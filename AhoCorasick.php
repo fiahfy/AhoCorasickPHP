@@ -134,6 +134,54 @@ class AhoCorasick {
         return $tn;
     }
 
+    public function Find($text, $encoding = "UTF8") {
+        $tn = $this->treeNodes;
+        $ptr = $this->_root;          // Current node (state)
+        $index = 0;                   // Index in text
+        
+        $len = mb_strlen($text, $encoding);
+        while ($index < $len) {
+            // Find next state (if no transition exists, fail function is used)
+            // walks through tree until transition is found or root is reached
+
+            $trans = null;
+            while ($trans == null) {
+
+                $char = mb_substr($text, $index, 1, $encoding);
+                $trans = $tn->getTransition($ptr, $char);
+
+                if ($ptr == $this->_root) {
+                    break;
+                } elseif ($trans == null) {
+                    $ptr = $tn->getFailure($ptr);
+                }
+            }
+
+            if ($trans != null) {
+                $ptr = $trans;
+            }
+
+            if ($this->debug === 1) {
+                echo "move:" . $ptr . "[" . $tn->getChar($ptr) . "]; ";
+            }
+
+            // Add results from node to output array and move to next character
+            if ($this->combineResults) {
+                foreach ($tn->getResults($ptr) as $found) {
+                    return $this->addResult($found, $index, $encoding);
+                }
+            } else {
+                $found = $tn->getResult($ptr);
+                if ($found != null) {
+                    return $this->addResult($found, $index, $encoding);
+                }
+            }
+
+            $index++;
+        }
+        return null;
+    }
+
     public function FindAll($text, $encoding = "UTF8") {
         $ret = array(); // List containing results
         $tn = $this->treeNodes;

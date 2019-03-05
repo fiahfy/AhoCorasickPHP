@@ -13,7 +13,7 @@ $memoryWhole = memory_get_usage();
 $inputText = "Hey one! How are you?";
 
 function getKeywords() {
-    return array("one", "two", "three", "four");
+    return array("one", "two", "three", "four", "you");
 }
 
 function memUsage($startMemory, $caption = "") {
@@ -49,11 +49,17 @@ function saveToCache($tree, $filePath) {
       memUsage($memoryWhole, "Memory (tree built):");
       unset($keywords);
       memUsage($memoryWhole, "Memory (keywords unset):");
-      saveToCache($ac, $filePath);
+    //   saveToCache($ac, $filePath);
       memUsage($memoryWhole, "Memory (result cached):");                                    
   } else {
       $ac = unserialize(file_get_contents($filePath));
   }
+
+  $res = $ac->Find($inputText);
+  memUsage($memoryWhole, "Memory (after find):");
+  memUsage($memoryWhole, "Memory whole:");
+  
+  echo "<b>Results: </b><pre>";var_dump($res);echo "</pre>";
 
   $res = $ac->FindAll($inputText);
   memUsage($memoryWhole, "Memory (after find all):");
